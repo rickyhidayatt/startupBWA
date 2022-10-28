@@ -44,3 +44,31 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) Login(c *gin.Context) {
+	var input user.LoginInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		pesanError := helper.FormatErrorValidator(err)
+		errorMassage := gin.H{"errors": pesanError}
+
+		response := helper.APIresponse("Login Account Failed", http.StatusUnprocessableEntity, "Error", errorMassage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	LoginUser, err := h.userService.Login(input)
+
+	if err != nil {
+		errorMassage := gin.H{"errors": err.Error()}
+
+		response := helper.APIresponse("Login Account Failed", http.StatusUnprocessableEntity, "Error", errorMassage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formaterr := user.FormatUser(LoginUser, "Tokennnntokentoken token token")
+
+	response := helper.APIresponse("Akun Berhasil Login", http.StatusOK, "succes", formaterr)
+	c.JSON(http.StatusOK, response)
+}
