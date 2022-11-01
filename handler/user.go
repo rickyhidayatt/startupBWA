@@ -109,3 +109,44 @@ func (h *userHandler) ChekEmailAvaliable(c *gin.Context) {
 	response := helper.APIresponse(metaMassage, http.StatusOK, "Succes", data)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	// Input data dari user
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_Uploaded": false}
+		response := helper.APIresponse("Failed to Upload Avatar image", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+	}
+
+	// Manggil file images dari folder Images
+	// + ngambil images ditambah file.Filename
+	path := "images/" + file.Filename
+
+	err = c.SaveUploadedFile(file, path)
+
+	if err != nil {
+		data := gin.H{"is_Uploaded": false}
+		response := helper.APIresponse("Failed to Upload Avatar image", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+	}
+
+	userID := 1 // Dapet dari JWT Percobaan inimah hehe :)
+
+	_, err = h.userService.SaveAvatar(userID, path)
+
+	if err != nil {
+		data := gin.H{"is_Uploaded": false}
+		response := helper.APIresponse("Failed to Upload Avatar image", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+	}
+
+	// Kalo gak error ya ke upload hehe :)
+	data := gin.H{"is_Uploaded": true}
+	response := helper.APIresponse("Avatar Succes Upload", http.StatusOK, "succes", data)
+
+	c.JSON(http.StatusOK, response)
+}
