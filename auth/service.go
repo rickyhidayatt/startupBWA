@@ -1,9 +1,14 @@
 package auth
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"errors"
+
+	"github.com/dgrijalva/jwt-go"
+)
 
 type Service interface {
 	GenerateToken(userID int) (string, error)
+	ValidasiToken(token string) (*jwt.Token, error) //kenapa balikin jwt? nanti butuh method dari bawaan jwt.token
 }
 
 type jwtService struct {
@@ -27,4 +32,23 @@ func (s *jwtService) GenerateToken(userID int) (string, error) {
 		return signedToken, err
 	}
 	return signedToken, nil
+}
+
+func (s *jwtService) ValidasiToken(encodedToken string) (*jwt.Token, error) {
+	token, err := jwt.Parse(encodedToken, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+
+		if !ok {
+			return nil, errors.New("Invalid token")
+		}
+		return []byte(Secret_Key), nil
+	})
+
+	if err != nil {
+		return token, err
+	}
+
+	return token, nil
+
+	// validasi terhadap token intinya apakah benar secret key yang dimiliki user sama dengan yang tadi kita kasih sebelumnya jika ya maju jika no stop ini kayanya bisa pake go Validator buat mempersingkat kodingan ini
 }
