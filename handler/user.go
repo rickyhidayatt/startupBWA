@@ -137,7 +137,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 	}
 
-	userID := 1 // Dapet dari JWT Percobaan inimah hehe :)
+	currentUser := c.MustGet("currentUser").(user.User) // ini buat auth midleware yang nyertain JWT
+	userID := currentUser.ID                            // Dapet dari JWT Percobaan inimah hehe :)
 
 	// Manggil file images dari folder Images
 	// + ngambil images ditambah file.Filename
